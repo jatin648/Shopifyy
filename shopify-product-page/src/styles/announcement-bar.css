@@ -1,0 +1,46 @@
+.announcement-bar {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 0;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.announcement-container {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.announcement-content {
+  white-space: nowrap;
+}
+
+.announcement-text {
+  margin: 0;
+  padding: 0;
+  font-weight: 500;
+  font-size: 14px;
+  animation: slideInfinite 40s linear infinite;
+  display: inline-block;
+}
+
+@keyframes slideInfinite {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@media (max-width: 768px) {
+  .announcement-bar {
+    padding: 10px 0;
+  }
+
+  .announcement-text {
+    font-size: 12px;
+    animation: slideInfinite 30s linear infinite;
+  }
+}

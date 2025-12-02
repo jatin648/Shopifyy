@@ -1,0 +1,58 @@
+{%- liquid
+  assign highlights = section.settings.highlights | split: ','
+-%}
+
+<div class="product-highlights">
+  <h3 class="highlights-title">Product Highlights</h3>
+  <ul class="highlights-list">
+    {%- for highlight in highlights -%}
+      <li class="highlight-item">
+        <span class="highlight-icon">✓</span>
+        <span class="highlight-text">{{ highlight | strip }}</span>
+      </li>
+    {%- endfor -%}
+  </ul>
+</div>
+
+<style>
+  .product-highlights {
+    margin: 24px 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7ff 0%, #ffe5f0 100%);
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+  }
+
+  .highlights-title {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .highlights-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .highlight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    color: #333;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .highlight-icon {
+    color: #667eea;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+
+  .highlight-text {
+    flex: 1;
+  }
+</style>

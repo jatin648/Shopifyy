@@ -1,0 +1,323 @@
+{%- liquid
+  assign product = section.settings.product
+  assign heading = section.settings.heading
+  assign description = section.settings.description
+  assign show_highlights = section.settings.show_highlights
+  assign show_faq = section.settings.show_faq
+  assign show_announcement = section.settings.show_announcement
+-%}
+
+<section class="custom-product-section" data-product-id="{{ product.id }}">
+  {%- if show_announcement -%}
+    <div class="announcement-bar">
+      <div class="announcement-content">
+        <p class="announcement-text">{{ section.settings.announcement_text }}</p>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="product-container">
+    <div class="product-wrapper">
+      <div class="product-gallery">
+        {%- for image in product.featured_image -%}
+          <img 
+            src="{{ image | image_url: width: 600 }}" 
+            alt="{{ product.title }}"
+            class="product-image"
+            loading="lazy"
+          >
+        {%- endfor -%}
+      </div>
+
+      <div class="product-details">
+        <div class="product-header">
+          <h1 class="product-title">{{ heading | default: product.title }}</h1>
+          <p class="product-price">
+            {%- if product.compare_at_price -%}
+              <span class="original-price">{{ product.compare_at_price | money }}</span>
+            {%- endif -%}
+            <span class="sale-price">{{ product.price | money }}</span>
+          </p>
+          <div class="rating-section">
+            <div class="stars">
+              {%- for i in (1..5) -%}
+                <span class="star {% if i <= 4 %}filled{% endif %}">★</span>
+              {%- endfor -%}
+            </div>
+            <span class="review-count">({{ product.reviews_count | default: 0 }} reviews)</span>
+          </div>
+        </div>
+
+        {%- if description -%}
+          <div class="product-description">
+            {{ description }}
+          </div>
+        {%- else -%}
+          <div class="product-description">
+            {{ product.description }}
+          </div>
+        {%- endif -%}
+
+        {%- if show_highlights -%}
+          {% include 'product-highlights' %}
+        {%- endif -%}
+
+        <div class="product-form-section">
+          {%- form 'product', product, id: 'product-form' -%}
+            {%- for block in section.blocks -%}
+              {%- case block.type -%}
+                {%- when 'variant_selector' -%}
+                  <div class="variant-selector">
+                    {%- for option in product.options -%}
+                      <div class="option-group">
+                        <label for="option-{{ option }}">{{ option }}</label>
+                        <select name="options[{{ option }}]" id="option-{{ option }}">
+                          {%- for value in product.options_by_name[option].values -%}
+                            <option value="{{ value }}">{{ value }}</option>
+                          {%- endfor -%}
+                        </select>
+                      </div>
+                    {%- endfor -%}
+                  </div>
+
+                {%- when 'quantity_selector' -%}
+                  <div class="quantity-selector">
+                    <label for="quantity">Quantity:</label>
+                    <div class="quantity-controls">
+                      <button type="button" class="qty-btn minus">−</button>
+                      <input 
+                        type="number" 
+                        name="quantity" 
+                        id="quantity" 
+                        value="1" 
+                        min="1" 
+                        max="999"
+                        class="qty-input"
+                      >
+                      <button type="button" class="qty-btn plus">+</button>
+                    </div>
+                  </div>
+
+                {%- when 'add_to_cart' -%}
+                  <button 
+                    type="submit" 
+                    class="add-to-cart-btn"
+                    {% if product.available == false %}disabled{% endif %}
+                  >
+                    {%- if product.available -%}
+                      Add to Cart
+                    {%- else -%}
+                      Sold Out
+                    {%- endif -%}
+                  </button>
+              {%- endcase -%}
+            {%- endfor -%}
+
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          {%- endform -%}
+        </div>
+
+        {%- if show_faq -%}
+          <div class="faq-section">
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-accordion">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'faq_item' -%}
+                  <div class="faq-item">
+                    <button class="faq-question" data-faq-toggle>
+                      {{ block.settings.question }}
+                      <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                      {{ block.settings.answer }}
+                    </div>
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+
+  {%- if show_announcement -%}
+    <div class="sticky-add-to-cart-bar">
+      <div class="sticky-content">
+        <div class="sticky-product-info">
+          <img src="{{ product.featured_image | image_url: width: 80 }}" alt="{{ product.title }}" class="sticky-image">
+          <div>
+            <p class="sticky-title">{{ product.title }}</p>
+            <p class="sticky-price">{{ product.price | money }}</p>
+          </div>
+        </div>
+        <form method="post" action="/cart/add" class="sticky-form">
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          <button type="submit" class="sticky-cart-btn">Add to Cart</button>
+        </form>
+      </div>
+    </div>
+  {%- endif -%}
+</section>
+
+<style>
+  .announcement-bar {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .announcement-text {
+    animation: slideText 30s linear infinite;
+    margin: 0;
+    font-weight: 500;
+  }
+
+  @keyframes slideText {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+
+  .product-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .product-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+
+  .product-image {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .product-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    color: #1a1a1a;
+  }
+
+  .sale-price {
+    font-size: 24px;
+    font-weight: 600;
+    color: #667eea;
+  }
+
+  .rating-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+  }
+
+  .stars {
+    display: flex;
+    gap: 4px;
+    font-size: 18px;
+  }
+
+  .star.filled {
+    color: #ffc107;
+  }
+
+  .sticky-add-to-cart-bar {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 1px solid #e0e0e0;
+    padding: 16px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+  }
+
+  .sticky-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .sticky-product-info {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .sticky-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .sticky-cart-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .sticky-cart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+  }
+
+  @media (max-width: 768px) {
+    .product-wrapper {
+      grid-template-columns: 1fr;
+    }
+
+    .sticky-content {
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sticky-product-info {
+      width: 100%;
+    }
+
+    .sticky-cart-btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const faqToggles = document.querySelectorAll('[data-faq-toggle]');
+    faqToggles.forEach(toggle => {
+      toggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const answer = this.nextElementSibling;
+        answer.style.maxHeight = answer.style.maxHeight ? null : answer.scrollHeight + 'px';
+      });
+    });
+
+    const qtyBtns = document.querySelectorAll('.qty-btn');
+    qtyBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const input = this.parentElement.querySelector('.qty-input');
+        const value = parseInt(input.value);
+        if (this.classList.contains('minus') && value > 1) {
+          input.value = value - 1;
+        } else if (this.classList.contains('plus')) {
+          input.value = value + 1;
+        }
+      });
+    });
+  });
+</script>
